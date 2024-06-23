@@ -1,0 +1,89 @@
+name: Setup And Deploy 2048 game to EKS
+
+on:
+  push:
+    branches:
+      - main
+    
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Install eksctl
+      uses: moia-oss/setup-eksctl@v1
+      with:
+        version: 'latest'
+      id: install
+
+    - name: Create Cluster
+      run: eksctl create cluster --name game-cluster --region us-east-1 --fargate
+
+    - name: Create Fargate Profile
+      run: |
+        eksctl create fargateprofile \
+        --cluster game-cluster \
+        --region us-east-1 \
+        --name alb-game-app \
+        --namespace game-2048
+
+    - name: Deploy Game to Kubernetes
+      run: kubectl apply -f kube-manifest/
+
+    - name: Check Ingress
+      run: kubectl get ingress -n game-2048
+
+    - name: Configure IAM OIDC Provider
+      run: |
+        oidc_id=$(aws eks describe-cluster --name game-cluster --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
+        eksctl utils associate-iam-oidc-provider --cluster game-cluster --approve
+
+    - name: Create IAM Policy
+      run: |
+        aws iam create-policy \
+        --policy-name AWSLoadBalancerControllerIAMPolicy \
+        --policy-document file://iam-policy.json
+
+    - name: Create IAM Role
+      run: |
+        eksctl create iamserviceaccount \
+        --cluster=game-cluster \
+        --namespace=kube-system \
+        --name=aws-load-balancer-controller \
+        --role-name AmazonEKSLoadBalancerControllerRole \
+        --attach-policy-arn=arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/AWSLoadBalancerControllerIAMPolicy \
+        --approve
+
+    - name: Deploy
+      uses: WyriHaximus/github-action-helm3@v3
+      with:
+        exec: |
+            helm repo add eks https://aws.github.io/eks-charts
+            helm repo update eks
+            helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system \
+            --set clusterName=game-cluster \
+            --set serviceAccount.create=false \
+            --set serviceAccount.name=aws-load-balancer-controller \
+            --set region=us-east-1 \
+            --set vpcId=$(aws eks describe-cluster --name game-cluster --query "cluster.resourcesVpcConfig.vpcId" --output text)
+        #kubeconfig: ''
+        #overrule_existing_kubeconfig: "true"
+        
+    - name: Check Load Balancer
+      run: kubectl get ingress -n game-2048
