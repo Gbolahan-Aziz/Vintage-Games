@@ -3,12 +3,6 @@ name: Destroy Infrastructure for 2048 game to EKS
 on:
   workflow_dispatch:
 
-
-    name: Destroy EKS Cluster and Resources
-
-on:
-  workflow_dispatch:
-
 jobs:
   destroy:
     runs-on: ubuntu-latest
