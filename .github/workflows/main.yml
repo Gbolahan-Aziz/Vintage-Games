@@ -27,11 +27,16 @@ jobs:
       with:
         version: 'latest'
 
-    - name: Install eksctl
-      uses: moia-oss/setup-eksctl@v1
+    - uses: azure/setup-helm@v4.2.0
       with:
         version: 'latest'
       id: install
+
+    - name: Install eksctl
+      uses: moia-oss/setup-eksctl@v1
+      with:
+        version: '0.121.0'
+
 
     - name: Create Cluster
       run: eksctl create cluster --name game-cluster --region us-east-1 --fargate

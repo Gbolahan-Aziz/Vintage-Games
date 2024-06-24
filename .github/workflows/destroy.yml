@@ -26,7 +26,7 @@ jobs:
     - name: Install eksctl
       uses: moia-oss/setup-eksctl@v1
       with:
-        version: 'latest'
+        version: '0.121.0'
 
     - name: Uninstall ALB controller
       uses: WyriHaximus/github-action-helm3@v3
