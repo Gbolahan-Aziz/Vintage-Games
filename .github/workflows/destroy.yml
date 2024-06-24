@@ -1,0 +1,68 @@
+name: Destroy Infrastructure for 2048 game to EKS
+
+on:
+  workflow_dispatch:
+
+
+    name: Destroy EKS Cluster and Resources
+
+on:
+  workflow_dispatch:
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Install eksctl
+      uses: moia-oss/setup-eksctl@v1
+      with:
+        version: 'latest'
+
+    - name: Uninstall ALB controller
+      uses: WyriHaximus/github-action-helm3@v3
+      with:
+        exec: helm uninstall aws-load-balancer-controller -n kube-system
+
+    - name: Delete Namespaces
+      run: |
+        kubectl delete namespace game-2048 || true
+        kubectl delete namespace kube-system || true
+
+    - name: Detach IAM Policy
+      run: |
+        aws iam detach-role-policy \
+          --role-name AmazonEKSLoadBalancerControllerRole \
+          --policy-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/AWSLoadBalancerControllerIAMPolicy || true
+
+    - name: Delete IAM Policy
+      run: |
+        aws iam delete-policy \
+          --policy-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/AWSLoadBalancerControllerIAMPolicy || true
+
+    - name: Delete IAM Role
+      run: |
+        aws iam delete-role --role-name AmazonEKSLoadBalancerControllerRole || true
+
+    - name: Delete Fargate Profile
+      run: |
+        eksctl delete fargateprofile --cluster game-cluster --name alb-game-app --region us-east-1 || true
+
+    - name: Delete EKS Cluster
+      run: |
+        eksctl delete cluster --name game-cluster --region us-east-1 || true
