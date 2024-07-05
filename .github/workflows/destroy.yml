@@ -24,7 +24,7 @@ jobs:
         version: 'latest'
 
     - name: Install eksctl
-      uses: robatwave/github-action-eksctl@0.1.2
+      uses: moia-oss/setup-eksctl@v2.2.0
       with:
         version: 'latest'
 
