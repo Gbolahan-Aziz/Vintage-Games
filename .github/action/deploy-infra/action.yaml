@@ -1,0 +1,37 @@
+name: "Deploy AWS resources"
+description: "This GitHub Action handles the deployment of the terraform resources"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v2
+
+    - name: HashiCorp - Setup Terraform
+      uses: hashicorp/setup-terraform@v1.2.1
+      with:
+        terraform_wrapper: false
+    
+    - name: Terraform fmt
+      id: fmt
+      shell: bash
+      working-directory: './terraform'
+      run: terraform fmt -check
+      continue-on-error: true
+
+    - name: Terraform init
+      id: init
+      shell: bash
+      working-directory: './terraform'
+      run: terraform init
+
+    - id: plan
+      working-directory: './terraform'
+      shell: bash
+      run: terraform plan -no-color -out=plan.tfdata
+
+    - name: Terraform Apply
+      working-directory: './terraform'
+      if: ${{ github.event_name != 'pull_request' }}
+      shell: bash
+      run: terraform apply -auto-approve plan.tfdata

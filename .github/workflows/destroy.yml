@@ -1,14 +1,19 @@
-name: Destroy Infrastructure for 2048 game to EKS
+name: Destroy Infrastructure
 
 on:
   workflow_dispatch:
 
 jobs:
   destroy:
+    name: "Destroy Infrastructure"
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: './terraform/'
 
     steps:
-    - name: Checkout code
+    - name: Checkout GitHub Action
       uses: actions/checkout@v2
 
     - name: Configure AWS credentials
@@ -23,40 +28,28 @@ jobs:
       with:
         version: 'latest'
 
-    - name: Install eksctl
-      uses: moia-oss/setup-eksctl@v1
+    - name: Install Helm
+      uses: azure/setup-helm@v1
       with:
-        version: '0.121.0'
+        version: 'latest'
 
-    - name: Uninstall ALB controller
-      uses: WyriHaximus/github-action-helm3@v3
-      with:
-        exec: helm uninstall aws-load-balancer-controller -n kube-system
-
-    - name: Delete Namespaces
+    - name: Configure kubectl
       run: |
-        kubectl delete namespace game-2048 || true
-        kubectl delete namespace kube-system || true
+        aws eks update-kubeconfig --name game-cluster --region us-east-1
 
-    - name: Detach IAM Policy
+    - name: Uninstall AWS Load Balancer Controller
       run: |
-        aws iam detach-role-policy \
-          --role-name AmazonEKSLoadBalancerControllerRole \
-          --policy-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/AWSLoadBalancerControllerIAMPolicy || true
+        helm uninstall aws-load-balancer-controller --namespace kube-system || true
 
-    - name: Delete IAM Policy
+    - name: Delete Monitoring Namespace
       run: |
-        aws iam delete-policy \
-          --policy-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/AWSLoadBalancerControllerIAMPolicy || true
+        kubectl delete namespace monitoring --ignore-not-found || true
 
-    - name: Delete IAM Role
+    - name: Delete Game Namespace
       run: |
-        aws iam delete-role --role-name AmazonEKSLoadBalancerControllerRole || true
+        kubectl delete namespace game-2048 --ignore-not-found || true
 
-    - name: Delete Fargate Profile
+    - name: Destroy EKS Infrastructure
       run: |
-        eksctl delete fargateprofile --cluster game-cluster --name alb-game-app --region us-east-1 || true
-
-    - name: Delete EKS Cluster
-      run: |
-        eksctl delete cluster --name game-cluster --region us-east-1 || true
+        terraform init
+        terraform destroy -auto-approve
