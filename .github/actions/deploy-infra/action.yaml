@@ -35,6 +35,4 @@ runs:
       if: ${{ github.event_name != 'pull_request' }}
       shell: bash
       run: terraform apply -auto-approve plan.tfdata
-      env: 
-        TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
 

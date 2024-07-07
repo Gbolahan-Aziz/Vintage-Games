@@ -34,6 +34,8 @@ jobs:
       - name: Deploy EKS Infrastructure
         uses: ./.github/actions/deploy-infra
         id: deploy_infra
+        env: 
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
 
       
   deploy:
