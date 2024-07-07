@@ -53,3 +53,5 @@ jobs:
       run: |
         terraform init
         terraform destroy -auto-approve
+      env: 
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
