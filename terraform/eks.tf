@@ -11,3 +11,6 @@ resource "aws_eks_fargate_profile" "fargate_profile" {
 
 }
 
+data "aws_iam_openid_connect_provider" "eks_oidc" {
+  url = module.eks.cluster_oidc_issuer_url
+}

@@ -43,11 +43,11 @@ resource "aws_iam_role" "aws_load_balancer_controller_role" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Effect = "Allow"
         Principal = {
-          Federated = aws_iam_openid_connect_provider.oidc_provider.arn
+          Federated = data.aws_iam_openid_connect_provider.eks_oidc.arn
         }
         Condition = {
           StringEquals = {
-            "${data.aws_eks_cluster.game_cluster.identity[0].oidc[0].issuer}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+            "${data.aws_iam_openid_connect_provider.eks_oidc.url}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
           }
         }
       }
