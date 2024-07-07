@@ -47,7 +47,7 @@ resource "aws_iam_role" "aws_load_balancer_controller_role" {
         }
         Condition = {
           StringEquals = {
-            "${data.aws_eks_cluster.game_cluster.identity[0].oidc.issuer}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+            "${data.aws_eks_cluster.game_cluster.identity[0].oidc[0].issuer}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
           }
         }
       }

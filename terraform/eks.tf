@@ -35,8 +35,12 @@ data "aws_eks_cluster_auth" "game_cluster" {
   name = aws_eks_cluster.game_cluster.name
 }
 
+data "tls_certificate" "eks_oidc_thumbprint" {
+  url = data.aws_eks_cluster.game_cluster.identity[0].oidc[0].issuer
+}
+
 resource "aws_iam_openid_connect_provider" "oidc_provider" {
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.aws_eks_cluster.game_cluster.identity[0].oidc.issuer]
-  url             = data.aws_eks_cluster.game_cluster.identity[0].oidc.issuer
+  thumbprint_list = [data.tls_certificate.eks_oidc_thumbprint.certificates[0].sha1_fingerprint]
+  url             = data.aws_eks_cluster.game_cluster.identity[0].oidc[0].issuer
 }
