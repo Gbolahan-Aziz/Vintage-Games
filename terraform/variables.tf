@@ -14,9 +14,3 @@ variable "aws_account_id" {
   description = "AWS Account ID"
   type        = string
 }
-
-variable "key_name" {
-  description = "key pair"
-  type        = string
-  default = "webserver"
-}
