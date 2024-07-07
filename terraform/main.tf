@@ -31,22 +31,6 @@ module "eks" {
 
       key_name = var.key_name
     }
-  node_security_group_additional_rules = [
-    {
-      description = "Allow inbound HTTPS traffic from anywhere"
-      from_port   = 443
-      to_port     = 443
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-      description = "Allow outbound HTTPS traffic to anywhere"
-      from_port   = 443
-      to_port     = 443
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-  ]
   }
 }
 
