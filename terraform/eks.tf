@@ -12,10 +12,12 @@ resource "aws_eks_fargate_profile" "fargate_profile" {
 
 data "aws_eks_cluster" "game_cluster" {
   name = var.cluster_name
+  depends_on =  [module.eks]
 }
 
 data "aws_eks_cluster_auth" "game_cluster" {
   name = var.cluster_name
+  depends_on =  [module.eks]
 }
 
 data "tls_certificate" "eks_oidc_thumbprint" {
