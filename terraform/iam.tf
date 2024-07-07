@@ -54,7 +54,7 @@ resource "aws_iam_role" "aws_load_balancer_controller_role" {
     ]
   })
   depends_on = [
-    aws_iam_openid_connect_provider.oidc_provider
+    data.aws_iam_openid_connect_provider.eks_oidc
   ]
 }
 
