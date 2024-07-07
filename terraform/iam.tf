@@ -47,7 +47,7 @@ resource "aws_iam_role" "aws_load_balancer_controller_role" {
         }
         Condition = {
           StringEquals = {
-            "${data.aws_iam_openid_connect_provider.eks_oidc.url}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+            "${data.aws_iam_openid_connect_provider.eks_oidc.url}:sub"="system:serviceaccount:kube-system:aws-load-balancer-controller"
           }
         }
       }
@@ -83,4 +83,34 @@ resource "aws_iam_role" "eks_pod_execution_role" {
 resource "aws_iam_role_policy_attachment" "eks_pod_execution_role_AmazonEKSFargatePodExecutionRolePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
   role       = aws_iam_role.eks_pod_execution_role.name
+}
+
+
+data "aws_iam_policy_document" "eks_assume_role_policy" {
+ statement {
+ actions = ["sts:AssumeRoleWithWebIdentity"]
+ effect = "Allow"
+condition {
+ test = "StringEquals"
+ variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:sub"
+ values = ["system:serviceaccount:kube-system:aws-node"]
+ }
+principals {
+ identifiers = [data.aws_iam_openid_connect_provider.eks_oidc.arn]
+ type = "Federated"
+ }
+ }
+}
+resource "aws_iam_role" "aws-node" {
+ assume_role_policy = data.aws_iam_policy_document.eks_assume_role_policy.json
+ name = "aws-node"
+}
+resource "aws_eks_identity_provider_config" "demo" {
+ cluster_name = var.cluster_name
+ oidc {
+ client_id = data.aws_iam_openid_connect_provider.eks_oidc.client_id_list[0]
+ identity_provider_config_name = "eks-connect"
+ issuer_url = "https://${data.aws_iam_openid_connect_provider.eks_oidc.url}"
+ 
+ }
 }
