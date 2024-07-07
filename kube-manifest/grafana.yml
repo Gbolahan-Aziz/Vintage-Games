@@ -7,7 +7,7 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grafana-deployment
+  name: grafana
   namespace: monitoring
 spec:
   replicas: 1
@@ -24,19 +24,31 @@ spec:
         image: grafana/grafana:latest
         ports:
         - containerPort: 3000
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grafana-admin-secret
+              key: admin-password
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+      volumes:
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: grafana-pvc
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: grafana-service
+  name: grafana
   namespace: monitoring
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
-  - port: 3000
+  - port: 80
     targetPort: 3000
     protocol: TCP
-    name: http
   selector:
     app: grafana

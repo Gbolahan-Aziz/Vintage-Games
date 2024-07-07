@@ -7,8 +7,10 @@ terraform {
     }
   }
 
-  backend "local" {
-    path = "terraform.tfstate"
+  backend "s3" {
+    bucket = "terraform01-state-bucket"
+    key    = "terraform/state/game.tfstate"
+    region = "us-east-1"
   }
 }
 
