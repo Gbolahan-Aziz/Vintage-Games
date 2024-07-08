@@ -107,11 +107,11 @@ resource "aws_iam_role" "aws-node" {
 }
 
 resource "aws_eks_identity_provider_config" "demo" {
- cluster_name = var.cluster_name
- oidc {
- client_id = data.aws_iam_openid_connect_provider.eks_oidc.client_id_list[0]
- identity_provider_config_name = "eks-connect"
- issuer_url = "https://${data.aws_iam_openid_connect_provider.eks_oidc.url}"
- 
- }
+  cluster_name = var.cluster_name
+  oidc {
+    client_id                     = data.aws_iam_openid_connect_provider.eks_oidc.client_id_list[0]
+    identity_provider_config_name = "eks-connect"
+    issuer_url                    = "https://${data.aws_iam_openid_connect_provider.eks_oidc.url}"
+
+  }
 }
