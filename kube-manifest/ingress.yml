@@ -1,20 +1,34 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  namespace: game-2048
-  name: ingress-2048
+  name: games-ingress
+  namespace: staging
   annotations:
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
+    ingressClassName: nginx
+    # nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  ingressClassName: alb
   rules:
-    - http:
-        paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: service-2048
-              port:
-                number: 80
+  - host: vintage-games.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: homepage-service
+            port:
+              number: 8800
+      - path: /2048
+        pathType: Prefix
+        backend:
+          service:
+            name: service-2048
+            port:
+              number: 9000
+      - path: /tetris
+        pathType: Prefix
+        backend:
+          service:
+            name: tetris-service
+            port:
+              number: 8900

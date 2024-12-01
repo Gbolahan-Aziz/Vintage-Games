@@ -1,13 +1,43 @@
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: game-2048
+  namespace: staging
   name: service-2048
 spec:
   ports:
-    - port: 80
+    - port: 9000
       targetPort: 80
       protocol: TCP
-  type: NodePort
+  type: ClusterIP
   selector:
-    app.kubernetes.io/name: app-2048
+    app: game-2048
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: staging
+  name: tetris-service
+spec:
+  ports:
+    - port: 8900
+      targetPort: 80
+      protocol: TCP
+  type: ClusterIP
+  selector:
+    app: game-tetris
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: staging
+  name: homepage-service
+spec:
+  ports:
+    - port: 8800
+      targetPort: 80
+      protocol: TCP
+  type: ClusterIP
+  selector:
+    app: static-page

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Homepage</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #222;
+      color: #fff;
+    }
+    .game-button {
+      padding: 15px 30px;
+      margin: 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .game-button:hover {
+      background-color: #444;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to the Game Hub</h1>
+  <audio id="bg-music" autoplay loop>
+    <source src="background-music.mp3" type="audio/mpeg mp3">
+    Your browser does not support the audio element.
+  </audio>
+  <button class="game-button" id="tetris-btn">Play Tetris</button>
+  <button class="game-button" id="2048-btn">Play 2048</button>
+  <audio id="click-sound">
+    <source src="click-sound.mp3" type="audio/mpeg mp3">
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    const clickSound = document.getElementById('click-sound');
+
+    document.getElementById('tetris-btn').addEventListener('click', () => {
+      clickSound.play();
+      window.location.href = '/tetris'; // Redirect to Tetris
+    });
+
+    document.getElementById('2048-btn').addEventListener('click', () => {
+      clickSound.play();
+      window.location.href = '/2048'; // Redirect to 2048
+    });
+  </script>
+</body>
+</html>

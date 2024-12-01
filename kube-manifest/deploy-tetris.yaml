@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: game-tetris
+  name: game-tetris
+  namespace: staging
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: game-tetris
+  template:
+    metadata:
+      labels:
+        app: game-tetris
+    spec:
+      containers:
+      - image: iamzee007/docker-tetris
+        name: tetris
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+      
