@@ -6,11 +6,35 @@ This project involves deploying the popular game 2048 on an Amazon EKS cluster a
 
 ## Flowchart
 
+
+
+
 ```mermaid
 graph TD;
-    A[Start] --> B[Create EKS Cluster]
-    B --> C[Deploy 2048 Game]
-    C --> D[Configure Load Balancer]
-    D --> E[Set up Prometheus and Grafana]
-    E --> F[Monitor Cluster and Game]
-    F --> G[End]
+    subgraph CI/CD Pipeline
+        A[Code Repository (GitHub/CodeCommit)] -->|Code Changes| B[CodePipeline];
+        B --> C[CodeBuild];
+        C --> D[AWS Amplify];
+        C --> E[Lambda Deployment];
+    end
+
+    subgraph AWS Infrastructure
+        subgraph Frontend
+            D --> I[AWS Amplify];
+        end
+
+        subgraph Backend
+            E --> F[API Gateway];
+            F --> G[Lambda Functions];
+        end
+
+        subgraph Database
+            G --> H[Amazon RDS (MySQL)];
+        end
+
+        subgraph Networking
+            I --> J[CloudFront (CDN)];
+            F --> K[VPC];
+            H --> K;
+        end
+    end
