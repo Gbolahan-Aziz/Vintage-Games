@@ -1,0 +1,10 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: games-ingress
+  annotations:
+    ingressClassName: nginx
+spec:
+  rules:
+  - host: host.com
+    

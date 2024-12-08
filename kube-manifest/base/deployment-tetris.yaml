@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-tetris
+  labels:
+    app: game-tetris
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: game-tetris
+  template:
+    metadata:
+      labels:
+        app: game-tetris

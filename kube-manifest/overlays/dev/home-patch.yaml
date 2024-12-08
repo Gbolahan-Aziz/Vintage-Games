@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: static-page
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: static-page
+  template:
+    metadata:
+      labels:
+        app: static-page
+    spec:
+      containers:
+      - name: static-page
+        image: iamzee007/static-game-homepage:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "100m"
+          limits:
+            memory: "64Mi"
+            cpu: "250m"
+
