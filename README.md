@@ -2,8 +2,8 @@
 
 Welcome to the **Vintage Games Platform**, a delightful fusion of retro classics and modern technology. Relive the charm of *Tetris* and *2048* right in your browser, locally hosted for an optimal demonstration experience.
 
-![Preview](images\2048.gif)
-![Preview](images\tetris.gif)
+![Preview](images/2048.gif)
+![Preview](images/tetris.gif)
 
 ---
 
