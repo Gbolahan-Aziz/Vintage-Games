@@ -1,0 +1,13 @@
+resources:
+- ../../base
+namespace: dev
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+patches:
+- path: 2048-patch.yaml
+- path: 2048-svc-patch.yaml
+- path: home-patch.yaml
+- path: home-svc.yaml
+- path: ingress-patch.yaml
+- path: tetris-patch.yaml
+- path: tetris-svc-patch.yaml
