@@ -3,10 +3,5 @@ kind: Service
 metadata:
   name: service-2048
 spec:
-  ports:
-    - port: 9000
-      targetPort: 80
-      protocol: TCP
-  type: ClusterIP
   selector:
     app: game-2048
