@@ -3,10 +3,5 @@ kind: Service
 metadata:
   name: homepage-service
 spec:
-  ports:
-    - port: 8800
-      targetPort: 80
-      protocol: TCP
-  type: ClusterIP
   selector:
     app: static-page

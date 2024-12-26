@@ -3,10 +3,5 @@ kind: Service
 metadata:
   name: tetris-service
 spec:
-  ports:
-    - port: 8900
-      targetPort: 80
-      protocol: TCP
-  type: ClusterIP
   selector:
     app: game-tetris
