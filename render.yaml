@@ -1,0 +1,33 @@
+# Render.com deployment — static site
+# Deploy this repo on Render and point it at the home/ directory.
+# Free tier: static sites are always free on Render.
+
+services:
+  - type: web
+    name: vintage-arcade
+    runtime: static
+    staticPublishPath: home
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=3600
+      - path: /sounds/*
+        name: Cache-Control
+        value: public, max-age=31536000
+    routes:
+      - type: rewrite
+        source: /tetris
+        destination: /games/tetris.html
+      - type: rewrite
+        source: /2048
+        destination: /games/2048.html
+      - type: rewrite
+        source: /snake
+        destination: /games/snake.html
+      - type: rewrite
+        source: /breakout
+        destination: /games/breakout.html
+      - type: rewrite
+        source: /space-invaders
+        destination: /games/space-invaders.html

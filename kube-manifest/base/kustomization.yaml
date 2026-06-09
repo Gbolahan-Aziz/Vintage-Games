@@ -1,8 +1,4 @@
 resources:
   - deployment-home.yaml
-  - deployment-tetris.yaml
-  - deployment-2048.yaml
-  - service-tetris.yaml
-  - service-2048.yaml
   - service-home.yaml
   - ingress.yaml

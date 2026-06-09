@@ -3,54 +3,428 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Homepage</title>
+  <title>Vintage Games Arcade</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap');
+
+    :root {
+      --neon-cyan:    #00ffcc;
+      --neon-yellow:  #ffd93d;
+      --neon-red:     #ff6b6b;
+      --neon-green:   #6bcb77;
+      --neon-blue:    #4d96ff;
+      --neon-purple:  #cc66ff;
+      --bg:           #06060f;
+      --bg2:          #0e0e1c;
+      --border:       rgba(255,255,255,0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated starfield background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, #ffffff44 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 60%, #ffffff33 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 10%, #ffffff55 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 80%, #ffffff22 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 40%, #ffffff44 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 90%, #ffffff33 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 50%, #ffffff22 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 15%, #ffffff44 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Scanline effect */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .page-wrap {
+      position: relative;
+      z-index: 2;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 60px;
+    }
+
+    /* ── HEADER ── */
+    header {
       text-align: center;
-      margin: 0;
-      padding: 0;
-      background-color: #222;
-      color: #fff;
+      padding: 60px 0 40px;
     }
-    .game-button {
-      padding: 15px 30px;
-      margin: 20px;
-      font-size: 18px;
-      border: none;
-      border-radius: 5px;
+
+    .logo {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(22px, 5vw, 42px);
+      color: var(--neon-cyan);
+      text-shadow:
+        0 0 10px var(--neon-cyan),
+        0 0 30px var(--neon-cyan),
+        0 0 60px rgba(0,255,204,0.4);
+      letter-spacing: 4px;
+      line-height: 1.4;
+      animation: flicker 6s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 95%, 100% { opacity: 1; }
+      96% { opacity: 0.8; }
+      97% { opacity: 1; }
+      98% { opacity: 0.6; }
+      99% { opacity: 1; }
+    }
+
+    .tagline {
+      margin-top: 16px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    .insert-coin {
+      margin-top: 20px;
+      display: inline-block;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: var(--neon-yellow);
+      letter-spacing: 2px;
+      animation: blink 1.2s step-end infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── GAME GRID ── */
+    .section-title {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-title::before, .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .game-card {
+      position: relative;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
       cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      text-decoration: none;
+      color: inherit;
+      display: block;
     }
-    .game-button:hover {
-      background-color: #444;
-      color: #fff;
+
+    .game-card:hover {
+      transform: translateY(-6px) scale(1.02);
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 1px;
+      background: linear-gradient(135deg, var(--card-color), transparent 60%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .game-card:hover::before { opacity: 1; }
+
+    .game-card:hover { box-shadow: 0 20px 60px -10px var(--card-glow); }
+
+    .card-preview {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      background: radial-gradient(ellipse at center, var(--card-bg) 0%, transparent 70%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-preview::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 60%, var(--bg2));
+    }
+
+    .card-preview .emoji {
+      filter: drop-shadow(0 0 20px var(--card-color));
+      animation: float 3s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .card-body {
+      padding: 20px 22px 22px;
+    }
+
+    .card-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      color: var(--card-color);
+      text-shadow: 0 0 12px var(--card-color);
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .card-desc {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.7;
+      font-family: 'Courier New', monospace;
+      font-weight: normal;
+    }
+
+    .card-footer {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .play-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      padding: 10px 18px;
+      background: transparent;
+      border: 1px solid var(--card-color);
+      color: var(--card-color);
+      border-radius: 6px;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+
+    .game-card:hover .play-btn {
+      background: var(--card-color);
+      color: #000;
+      box-shadow: 0 0 20px var(--card-glow);
+    }
+
+    .badge {
+      font-size: 9px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 1px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Individual card themes */
+    .card-tetris    { --card-color: var(--neon-cyan);   --card-glow: rgba(0,255,204,0.3);   --card-bg: rgba(0,255,204,0.08); }
+    .card-2048      { --card-color: var(--neon-yellow);  --card-glow: rgba(255,217,61,0.3);   --card-bg: rgba(255,217,61,0.08); }
+    .card-snake     { --card-color: var(--neon-green);  --card-glow: rgba(107,203,119,0.3);  --card-bg: rgba(107,203,119,0.08); }
+    .card-breakout  { --card-color: var(--neon-blue);   --card-glow: rgba(77,150,255,0.3);   --card-bg: rgba(77,150,255,0.08); }
+    .card-invaders  { --card-color: var(--neon-purple); --card-glow: rgba(204,102,255,0.3);  --card-bg: rgba(204,102,255,0.08); }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      font-size: 10px;
+      color: rgba(255,255,255,0.2);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+      border-top: 1px solid var(--border);
+      padding-top: 30px;
+    }
+
+    /* ── MUSIC TOGGLE ── */
+    .music-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 100;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      color: rgba(255,255,255,0.5);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .music-btn:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .games-grid { grid-template-columns: 1fr; }
+      .logo { font-size: 20px; }
     }
   </style>
 </head>
 <body>
-  <h1>Welcome to the Game Hub</h1>
-  <audio id="bg-music" autoplay loop>
-    <source src="background-music.mp3" type="audio/mpeg mp3">
-    Your browser does not support the audio element.
+  <audio id="bg-music" loop>
+    <source src="sounds/background-music.mp3" type="audio/mpeg">
   </audio>
-  <button class="game-button" id="tetris-btn">Play Tetris</button>
-  <button class="game-button" id="2048-btn">Play 2048</button>
   <audio id="click-sound">
-    <source src="click-sound.mp3" type="audio/mpeg mp3">
-    Your browser does not support the audio element.
+    <source src="sounds/click-sound.mp3" type="audio/mpeg">
   </audio>
+
+  <div class="page-wrap">
+    <header>
+      <div class="logo">VINTAGE<br>ARCADE</div>
+      <p class="tagline">Classic games. Retro vibes. Zero quarters needed.</p>
+      <span class="insert-coin">▶ SELECT YOUR GAME ◀</span>
+    </header>
+
+    <p class="section-title">Available Games</p>
+
+    <div class="games-grid">
+
+      <a class="game-card card-tetris" href="games/tetris.html">
+        <div class="card-preview">
+          <span class="emoji">🟦</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">TETRIS</div>
+          <div class="card-desc">Stack falling tetrominoes to clear lines. Classic puzzle action — survive as long as you can.</div>
+          <div class="card-footer">
+            <span class="play-btn">PLAY NOW</span>
+            <span class="badge">PUZZLE</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="game-card card-2048" href="games/2048.html">
+        <div class="card-preview">
+          <span class="emoji">🔢</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">2048</div>
+          <div class="card-desc">Slide tiles to merge numbers. Reach the elusive 2048 tile. Deceptively addictive.</div>
+          <div class="card-footer">
+            <span class="play-btn">PLAY NOW</span>
+            <span class="badge">STRATEGY</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="game-card card-snake" href="games/snake.html">
+        <div class="card-preview">
+          <span class="emoji">🐍</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">SNAKE</div>
+          <div class="card-desc">Guide the snake to eat food and grow longer. Don't hit the walls — or yourself.</div>
+          <div class="card-footer">
+            <span class="play-btn">PLAY NOW</span>
+            <span class="badge">ARCADE</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="game-card card-breakout" href="games/breakout.html">
+        <div class="card-preview">
+          <span class="emoji">🧱</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">BREAKOUT</div>
+          <div class="card-desc">Bounce the ball to smash bricks. Multi-level action — don't let the ball drop.</div>
+          <div class="card-footer">
+            <span class="play-btn">PLAY NOW</span>
+            <span class="badge">ACTION</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="game-card card-invaders" href="games/space-invaders.html">
+        <div class="card-preview">
+          <span class="emoji">👾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">SPACE INVADERS</div>
+          <div class="card-desc">Defend Earth from descending alien waves. Shoot fast, dodge faster. Survive the invasion.</div>
+          <div class="card-footer">
+            <span class="play-btn">PLAY NOW</span>
+            <span class="badge">SHOOTER</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="page-wrap">
+      VINTAGE ARCADE &nbsp;·&nbsp; ALL GAMES PLAYABLE IN BROWSER &nbsp;·&nbsp; © 2025
+    </div>
+  </footer>
+
+  <button class="music-btn" id="musicBtn" title="Toggle music">🔇</button>
 
   <script>
+    const music = document.getElementById('bg-music');
     const clickSound = document.getElementById('click-sound');
+    const musicBtn = document.getElementById('musicBtn');
+    let musicOn = false;
 
-    document.getElementById('tetris-btn').addEventListener('click', () => {
-      clickSound.play();
-      window.location.href = '/tetris'; // Redirect to Tetris
+    musicBtn.addEventListener('click', () => {
+      musicOn = !musicOn;
+      if (musicOn) { music.play(); musicBtn.textContent = '🔊'; }
+      else { music.pause(); musicBtn.textContent = '🔇'; }
     });
 
-    document.getElementById('2048-btn').addEventListener('click', () => {
-      clickSound.play();
-      window.location.href = '/2048'; // Redirect to 2048
+    document.querySelectorAll('.game-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        clickSound.currentTime = 0;
+        clickSound.play().catch(() => {});
+      });
     });
   </script>
 </body>
