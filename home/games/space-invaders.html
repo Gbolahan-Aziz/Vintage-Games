@@ -68,12 +68,11 @@
     const ALIEN_COLS = 11, ALIEN_ROWS = 5;
     const ALIEN_W = 36, ALIEN_H = 28, ALIEN_GAP_X = 6, ALIEN_GAP_Y = 10;
 
-    let player, score, best=0, lives, wave, running=false, raf, stopBg;
+    let player, score, best=0, lives, wave, running=false, raf, stopBg=null;
     let aliens = [], bullets = [], enemyBullets = [], particles = [];
-    let alienDir = 1, alienStep = 0, alienDropY = 0, stopBg = null;
+    let alienDir = 1, alienStep = 0, alienDropY = 0;
     let alienMoveTimer = 0, alienMoveInterval = 60;
     let lastShot = 0, enemyShotTimer = 0;
-    let particles = [];
     const keys = {};
 
     const ALIEN_SHAPES = [
