@@ -107,6 +107,7 @@
   <button id="newBtn">NEW GAME</button>
   <p class="hint"><span>← → ↑ ↓</span> or swipe to merge tiles. Reach <span>2048</span>!</p>
 
+  <script src="../sounds/sfx.js"></script>
   <script>
     const TILE_COLORS = {
       2:    { bg: '#1a2a1a', color: '#6bcb77' },
@@ -122,13 +123,15 @@
       2048: { bg: '#2a1500', color: '#ffd700' },
     };
 
-    let grid, score, best = 0, won = false;
+    let grid, score, best = 0, won = false, stopBg = null;
     const gridEl = document.getElementById('grid');
 
     function newGame() {
       grid = Array.from({length:4}, () => Array(4).fill(0));
       score = 0; won = false;
       document.getElementById('status').textContent = '';
+      if (stopBg) stopBg();
+      stopBg = SFX.startBgMusic(SFX.BG_PATTERNS.g2048, 160);
       addTile(); addTile();
       render();
     }
@@ -170,7 +173,8 @@
           const val = nums[i] * 2;
           merged.push(val);
           score += val;
-          if (val === 2048 && !won) { won = true; document.getElementById('status').textContent = 'YOU WIN! Keep going!'; document.getElementById('status').style.color = '#ffd93d'; }
+          SFX.g2048.merge(val);
+          if (val === 2048 && !won) { won = true; SFX.g2048.win(); document.getElementById('status').textContent = 'YOU WIN! Keep going!'; document.getElementById('status').style.color = '#ffd93d'; }
           i += 2;
         } else {
           merged.push(nums[i]);
@@ -200,7 +204,7 @@
         t = t.map(row => slide([...row].reverse()).reverse());
         grid = Array.from({length:4}, (_,r) => t.map(col => col[r]));
       }
-      if (JSON.stringify(grid) !== prev) { addTile(); checkLose(); }
+      if (JSON.stringify(grid) !== prev) { SFX.g2048.slide(); addTile(); checkLose(); }
       render();
     }
 
@@ -217,7 +221,7 @@
       if (dir === 'down') {
         grid = transpose(transpose(grid).map(r => slide([...r].reverse()).reverse()));
       }
-      if (JSON.stringify(grid) !== prev) { addTile(); checkLose(); }
+      if (JSON.stringify(grid) !== prev) { SFX.g2048.slide(); addTile(); checkLose(); }
       render();
     }
 
@@ -227,6 +231,8 @@
         if (c<3 && grid[r][c]===grid[r][c+1]) return;
         if (r<3 && grid[r][c]===grid[r+1][c]) return;
       }
+      SFX.g2048.lose();
+      if (stopBg) { stopBg(); stopBg = null; }
       document.getElementById('status').textContent = 'GAME OVER!';
       document.getElementById('status').style.color = '#ff6b6b';
     }

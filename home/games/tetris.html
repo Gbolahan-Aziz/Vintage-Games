@@ -136,6 +136,7 @@
     </div>
   </div>
 
+  <script src="../sounds/sfx.js"></script>
   <script>
     const COLS = 12, ROWS = 24, BLOCK = 20;
     const COLORS = ['','#00ffcc','#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff6bb5','#ff9f43'];
@@ -156,7 +157,7 @@
     canvas.width = COLS * BLOCK;
     canvas.height = ROWS * BLOCK;
 
-    let board, piece, nextPiece, score, lines, level, gameOver, paused, running, raf, dropInterval, lastDrop;
+    let board, piece, nextPiece, score, lines, level, gameOver, paused, running, raf, dropInterval, lastDrop, stopBg;
 
     function newBoard() {
       return Array.from({length: ROWS}, () => Array(COLS).fill(0));
@@ -281,6 +282,9 @@
             lines += cleared;
             level = Math.floor(lines / 10) + 1;
             dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+            if (cleared === 4) SFX.tetris.tetrisClear(); else SFX.tetris.clear(cleared);
+          } else {
+            SFX.tetris.lock();
           }
           updateUI();
           piece = nextPiece;
@@ -288,6 +292,8 @@
           if (!valid(board, piece, 0, 0)) {
             gameOver = true;
             running = false;
+            SFX.tetris.gameOver();
+            if (stopBg) { stopBg(); stopBg = null; }
             document.getElementById('status').textContent = 'GAME OVER — Score: ' + score;
             document.getElementById('startBtn').textContent = 'RESTART';
             draw();
@@ -304,6 +310,8 @@
       board = newBoard();
       score = 0; lines = 0; level = 1; gameOver = false; paused = false;
       dropInterval = 1000; lastDrop = null;
+      if (stopBg) stopBg();
+      stopBg = SFX.startBgMusic(SFX.BG_PATTERNS.tetris, 220);
       piece = randomPiece();
       nextPiece = randomPiece();
       running = true;
@@ -322,17 +330,18 @@
         return;
       }
       switch (e.code) {
-        case 'ArrowLeft': if (valid(board, piece, -1, 0)) piece.x--; break;
-        case 'ArrowRight': if (valid(board, piece, 1, 0)) piece.x++; break;
+        case 'ArrowLeft': if (valid(board, piece, -1, 0)) { piece.x--; SFX.tetris.move(); } break;
+        case 'ArrowRight': if (valid(board, piece, 1, 0)) { piece.x++; SFX.tetris.move(); } break;
         case 'ArrowDown': if (valid(board, piece, 0, 1)) piece.y++; break;
         case 'ArrowUp': {
           const r = rotate(piece.shape);
-          if (valid(board, piece, 0, 0, r)) piece.shape = r;
+          if (valid(board, piece, 0, 0, r)) { piece.shape = r; SFX.tetris.rotate(); }
           break;
         }
         case 'Space': {
           e.preventDefault();
           while (valid(board, piece, 0, 1)) piece.y++;
+          SFX.tetris.lock();
           break;
         }
         case 'KeyP':

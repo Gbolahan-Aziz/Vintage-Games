@@ -59,6 +59,7 @@
   </div>
   <p class="hint"><span>Mouse / ← →</span> to move paddle · <span>Click</span> to launch</p>
 
+  <script src="../sounds/sfx.js"></script>
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -70,7 +71,7 @@
 
     const ROW_COLORS = ['#ff6b6b','#ff9f43','#ffd93d','#6bcb77','#4d96ff','#cc66ff'];
 
-    let paddle, ball, bricks, score, best = 0, lives, level, running, launched, raf;
+    let paddle, ball, bricks, score, best = 0, lives, level, running, launched, raf, stopBg;
 
     function initBricks() {
       bricks = [];
@@ -93,6 +94,8 @@
       ball = { x: W/2, y: H - 50, r: 8, vx: 0, vy: 0 };
       launched = false;
       initBricks();
+      if (stopBg) stopBg();
+      stopBg = SFX.startBgMusic(SFX.BG_PATTERNS.breakout, 240);
       running = true;
       document.getElementById('status').textContent = 'Click or press Space to launch!';
       updateUI();
@@ -157,6 +160,7 @@
         // Paddle collision
         if (ball.y + ball.r >= paddle.y && ball.y + ball.r <= paddle.y + paddle.h &&
             ball.x >= paddle.x - ball.r && ball.x <= paddle.x + paddle.w + ball.r && ball.vy > 0) {
+          SFX.breakout.paddle();
           ball.vy = -Math.abs(ball.vy);
           const rel = (ball.x - paddle.x) / paddle.w - 0.5;
           ball.vx = rel * 8;
@@ -168,9 +172,12 @@
         // Fell off bottom
         if (ball.y - ball.r > H) {
           lives--;
+          SFX.breakout.loseLife();
           updateUI();
           if (lives <= 0) {
             running = false;
+            if (stopBg) { stopBg(); stopBg = null; }
+            SFX.breakout.gameOver();
             document.getElementById('status').textContent = 'GAME OVER! Score: ' + score;
             draw();
             return;
@@ -184,6 +191,7 @@
           if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + BRICK_W &&
               ball.y + ball.r > b.y && ball.y - ball.r < b.y + BRICK_H) {
             b.hits--;
+            SFX.breakout.brick();
             if (b.hits <= 0) {
               b.alive = false;
               score += 10 * level;
@@ -203,6 +211,7 @@
         // Level complete
         if (bricks.every(b => !b.alive)) {
           level++;
+          SFX.breakout.levelUp();
           updateUI();
           initBricks();
           resetBall();

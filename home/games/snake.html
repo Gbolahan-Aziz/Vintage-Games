@@ -59,6 +59,7 @@
   </div>
   <p class="hint"><span>← → ↑ ↓</span> to steer · <span>P</span> to pause</p>
 
+  <script src="../sounds/sfx.js"></script>
   <script>
     const CELL = 20, COLS = 24, ROWS = 24;
     const canvas = document.getElementById('canvas');
@@ -66,7 +67,7 @@
     canvas.width = COLS * CELL;
     canvas.height = ROWS * CELL;
 
-    let snake, dir, nextDir, food, score, best = 0, running = false, paused = false, interval;
+    let snake, dir, nextDir, food, score, best = 0, running = false, paused = false, interval, stopBg;
 
     function rnd(max) { return Math.floor(Math.random() * max); }
 
@@ -87,6 +88,8 @@
       updateUI();
       document.getElementById('status').textContent = '';
       if (interval) clearInterval(interval);
+      if (stopBg) stopBg();
+      stopBg = SFX.startBgMusic(SFX.BG_PATTERNS.snake, 180);
       running = true;
       interval = setInterval(tick, 120);
     }
@@ -99,6 +102,8 @@
       if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS || snake.some(s => s.x === head.x && s.y === head.y)) {
         running = false;
         clearInterval(interval);
+        SFX.snake.die();
+        if (stopBg) { stopBg(); stopBg = null; }
         document.getElementById('status').textContent = 'GAME OVER! Score: ' + score;
         draw();
         return;
@@ -108,6 +113,7 @@
       if (head.x === food.x && head.y === food.y) {
         score += 10;
         if (score > best) best = score;
+        SFX.snake.eat();
         placeFood();
         updateUI();
       } else {
@@ -179,10 +185,10 @@
     document.addEventListener('keydown', e => {
       if (!running && (e.key.startsWith('Arrow'))) startGame();
       switch (e.key) {
-        case 'ArrowUp':    if (dir.y !== 1)  nextDir = {x:0, y:-1}; e.preventDefault(); break;
-        case 'ArrowDown':  if (dir.y !== -1) nextDir = {x:0, y:1};  e.preventDefault(); break;
-        case 'ArrowLeft':  if (dir.x !== 1)  nextDir = {x:-1, y:0}; e.preventDefault(); break;
-        case 'ArrowRight': if (dir.x !== -1) nextDir = {x:1, y:0};  e.preventDefault(); break;
+        case 'ArrowUp':    if (dir.y !== 1)  { nextDir = {x:0, y:-1}; SFX.snake.turn(); } e.preventDefault(); break;
+        case 'ArrowDown':  if (dir.y !== -1) { nextDir = {x:0, y:1};  SFX.snake.turn(); } e.preventDefault(); break;
+        case 'ArrowLeft':  if (dir.x !== 1)  { nextDir = {x:-1, y:0}; SFX.snake.turn(); } e.preventDefault(); break;
+        case 'ArrowRight': if (dir.x !== -1) { nextDir = {x:1, y:0};  SFX.snake.turn(); } e.preventDefault(); break;
         case 'p': case 'P':
           if (!running) return;
           paused = !paused;
@@ -206,7 +212,7 @@
     }, {passive:false});
 
     // Initial draw
-    snake = [{x:12,y:12}]; dir={x:1,y:0}; nextDir={x:1,y:0}; score=0;
+    snake = [{x:12,y:12}]; dir={x:1,y:0}; nextDir={x:1,y:0}; score=0; stopBg=null;
     food = {x:rnd(COLS), y:rnd(ROWS)};
     draw();
   </script>

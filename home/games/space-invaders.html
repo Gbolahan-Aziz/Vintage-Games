@@ -59,6 +59,7 @@
   </div>
   <p class="hint"><span>← →</span> Move · <span>Space</span> Shoot</p>
 
+  <script src="../sounds/sfx.js"></script>
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -67,8 +68,8 @@
     const ALIEN_COLS = 11, ALIEN_ROWS = 5;
     const ALIEN_W = 36, ALIEN_H = 28, ALIEN_GAP_X = 6, ALIEN_GAP_Y = 10;
 
-    let player, aliens, bullets, enemyBullets, score, best=0, lives, wave, running, raf;
-    let alienDir = 1, alienStep = 0, alienDropY = 0;
+    let player, aliens, bullets, enemyBullets, score, best=0, lives, wave, running, raf, stopBg;
+    let alienDir = 1, alienStep = 0, alienDropY = 0, stopBg = null;
     let alienMoveTimer = 0, alienMoveInterval = 60;
     let lastShot = 0, enemyShotTimer = 0;
     let particles = [];
@@ -107,6 +108,8 @@
       bullets = []; enemyBullets = []; particles = [];
       alienMoveTimer = 0; enemyShotTimer = 0; lastShot = 0;
       initAliens();
+      if (stopBg) stopBg();
+      stopBg = SFX.startBgMusic(SFX.BG_PATTERNS.invaders, 140);
       updateUI();
       document.getElementById('status').textContent = '';
       if (raf) cancelAnimationFrame(raf);
@@ -137,6 +140,7 @@
       // Shoot
       if ((keys[' '] || keys['Space']) && ts - lastShot > 350) {
         bullets.push({ x: player.x + player.w/2, y: player.y, w:3, h:12, vy:-10 });
+        SFX.invaders.shoot();
         lastShot = ts;
       }
 
@@ -144,6 +148,7 @@
       alienMoveTimer++;
       if (alienMoveTimer >= alienMoveInterval) {
         alienMoveTimer = 0;
+        SFX.invaders.march(alienStep++);
         const live = aliens.filter(a => a.alive);
         const rightmost = Math.max(...live.map(a => a.x + ALIEN_W));
         const leftmost = Math.min(...live.map(a => a.x));
@@ -187,6 +192,7 @@
           if (!a.alive) return;
           if (b.x > a.x && b.x < a.x+ALIEN_W && b.y > a.y && b.y < a.y+ALIEN_H) {
             a.alive = false;
+            SFX.invaders.alienHit();
             spawnParticles(a.x+ALIEN_W/2, a.y+ALIEN_H/2, ALIEN_COLORS[a.row]);
             score += (5 - a.row) * 10 * wave;
             if (score > best) best = score;
@@ -200,11 +206,13 @@
       enemyBullets.forEach((b, bi) => {
         if (b.x > player.x && b.x < player.x+player.w && b.y > player.y && b.y < player.y+player.h) {
           enemyBullets.splice(bi, 1);
+          SFX.invaders.playerDie();
           spawnParticles(player.x+player.w/2, player.y, '#4d96ff');
           lives--;
           updateUI();
           if (lives <= 0) {
             running = false;
+            if (stopBg) { stopBg(); stopBg = null; }
             document.getElementById('status').textContent = 'GAME OVER! Score: ' + score;
             draw(ts);
             return;
@@ -223,6 +231,7 @@
       // Wave clear
       if (!aliens.some(a => a.alive)) {
         wave++;
+        SFX.invaders.waveClr();
         initAliens();
         bullets = []; enemyBullets = [];
         document.getElementById('status').textContent = 'WAVE ' + wave + '!';
